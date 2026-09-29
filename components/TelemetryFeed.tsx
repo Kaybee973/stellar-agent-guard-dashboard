@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useState, useEffect } from "react";
 import { describeGuardEvent, explainReason, GUARD_EVENT_TOPICS } from "stellar-agent-guard-sdk";
 import type { GuardEvent } from "stellar-agent-guard-sdk";
 import { eventKey, useGuard, useGuardEvents } from "./GuardProvider.tsx";
@@ -8,6 +8,7 @@ import { TelemetryAlerts } from "./TelemetryAlerts.tsx";
 import { ErrorBlock, relativeTime, short, starLink } from "./bits.tsx";
 import { DateRangePicker } from "./DateRangePicker.tsx";
 import type { RangePreset, TimeRange } from "../lib/guard/ledgerTime.ts";
+import { density, initDensityStore } from "../lib/guard/densityStore.ts";
 import {
   EMPTY_TELEMETRY_FILTER,
   filterGuardEvents,
@@ -66,6 +67,18 @@ export function TelemetryFeed() {
   const { feed, startWatching, stopWatching, clearEvents, guard, queryRange, rangeLabel } =
     useGuard();
   const [filter, setFilter] = useState<TelemetryFilter>(EMPTY_TELEMETRY_FILTER);
+  const [densityState, setDensityState] = useState<"comfortable" | "compact">("comfortable");
+
+  useEffect(() => {
+    const unsubscribe = initDensityStore();
+    const densityUnsubscribe = density.subscribe((value) => {
+      setDensityState(value);
+    });
+    return () => {
+      unsubscribe();
+      densityUnsubscribe();
+    };
+  }, []);
 
   // The three controls and the exports all act on the same projection, so a
   // CSV/NDJSON download is provably the filtered view on screen — one row in,

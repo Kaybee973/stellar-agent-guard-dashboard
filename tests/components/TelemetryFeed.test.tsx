@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test, before, afterEach, describe } from "node:test";
 import { installDom, loadReact } from "../unit/domHarness.ts";
 import { TelemetryFeed } from "../../components/TelemetryFeed.tsx";
-import type { GuardEvent, GuardContextValue } from "stellar-agent-guard-sdk";
-import { GuardContext } from "../../components/GuardProvider.tsx";
+import type { GuardEvent } from "stellar-agent-guard-sdk";
+import { GuardContext, type GuardContextValue } from "../../components/GuardProvider.tsx";
 
 describe("TelemetryFeed", () => {
   let dom: ReturnType<typeof installDom>;
@@ -144,6 +144,8 @@ describe("TelemetryFeed", () => {
         ledger: 100000,
         decision: {
           result: "allowed",
+          reason: null,
+          source: "ledger",
         },
         data: {},
       },
@@ -156,6 +158,7 @@ describe("TelemetryFeed", () => {
         decision: {
           result: "blocked",
           reason: "not_authorized",
+          source: "diagnostic",
         },
         data: {},
       },
@@ -211,6 +214,8 @@ describe("TelemetryFeed", () => {
         ledger: 100000,
         decision: {
           result: "allowed",
+          reason: null,
+          source: "ledger",
         },
         data: {},
       },

@@ -1,9 +1,14 @@
-import { test, beforeEach, afterEach, describe } from "node:test";
+import { test, before, beforeEach, afterEach, describe } from "node:test";
 import assert from "node:assert/strict";
-import { density, initDensityStore } from "../lib/guard/densityStore.ts";
+import { installDom } from "./domHarness.ts";
+import { density, initDensityStore } from "../../lib/guard/densityStore.ts";
 
 describe("densityStore", () => {
   let unsubscribe: () => void;
+
+  before(() => {
+    installDom();
+  });
 
   beforeEach(() => {
     // Clear localStorage before each test

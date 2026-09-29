@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test, before, afterEach, describe } from "node:test";
 import { installDom, loadReact } from "../unit/domHarness.ts";
 import { PanicPanel } from "../../components/PanicPanel.tsx";
-import type { GuardContextValue, InvokeResult } from "stellar-agent-guard-sdk";
-import { GuardContext } from "../../components/GuardProvider.tsx";
+import { GuardContext, type GuardContextValue } from "../../components/GuardProvider.tsx";
+import type { InvokeResult } from "../../lib/guard/submit.ts";
 
 describe("PanicPanel", () => {
   let dom: ReturnType<typeof installDom>;

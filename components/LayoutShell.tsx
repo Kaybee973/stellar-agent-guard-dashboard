@@ -38,7 +38,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   // Handle touch gestures for mobile drawer
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
+      if (e.touches.length === 1 && e.touches[0]) {
         const touch = e.touches[0];
         setTouchStartX(touch.clientX);
         setTouchStartY(touch.clientY);
@@ -46,7 +46,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (touchStartX !== null && touchStartY !== null && drawerOpen) {
+      if (touchStartX !== null && touchStartY !== null && drawerOpen && e.changedTouches[0]) {
         const touch = e.changedTouches[0];
         const diffX = touch.clientX - touchStartX;
         const diffY = touch.clientY - touchStartY;
@@ -151,7 +151,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
                   aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                   aria-controls="sidebar-content"
                 >
-                  {sidebarCollapsed ? "»" : «"}
+                  {sidebarCollapsed ? "»" : "«"}
                 </button>
               )}
             </div>

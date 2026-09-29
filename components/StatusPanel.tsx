@@ -1,11 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { deadManRemaining, describePolicy, isDeadManFrozen } from "stellar-agent-guard-sdk";
 import { useGuard } from "./GuardProvider.tsx";
 import { ErrorBlock, Read, Stat, relativeTime, short } from "./bits.tsx";
 import { PHASE1_ARTIFACT, NETWORK } from "../lib/guard/network.ts";
 import { compilePrintReport } from "../lib/guard/printReport.ts";
 import { calculateVelocity } from "../lib/guard/velocity.ts";
+import { density, initDensityStore } from "../lib/guard/densityStore.ts";
 
 
 /**

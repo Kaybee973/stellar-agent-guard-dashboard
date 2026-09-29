@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test, before, afterEach, describe } from "node:test";
 import { installDom, loadReact } from "../unit/domHarness.ts";
 import { StatusPanel } from "../../components/StatusPanel.tsx";
-import type { GuardSnapshot } from "stellar-agent-guard-sdk";
-import { GuardContext } from "../../components/GuardProvider.tsx";
+import type { GuardSnapshot } from "../../lib/guard/guardOps.ts";
+import { GuardContext, type GuardContextValue } from "../../components/GuardProvider.tsx";
 
 // Mock localStorage for density store
 const localStorageMock = (() => {

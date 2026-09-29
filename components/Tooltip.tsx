@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Portal } from "./Portal.tsx";
 
 /**
@@ -28,7 +28,7 @@ export function Tooltip({
   const [position, setPosition] = useState<"top" | "bottom" | "left" | "right">("top");
   const [tooltipRect, setTooltipRect] = useState<DOMRect | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
-  const tooltipRef = useRef<HTMLElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Clean up timeout on unmount
@@ -45,6 +45,7 @@ export function Tooltip({
     if (!showTooltip || !tooltipRef.current || !triggerRef.current) return;
 
     const updatePosition = () => {
+      if (!triggerRef.current) return;
       const triggerRect = triggerRef.current.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
@@ -114,8 +115,10 @@ export function Tooltip({
       });
 
       // Find the first position that fits, or default to top if none fit
-      const bestPosition = positions.find((pos) => pos.fits) || positions[0];
-      setPosition(bestPosition.side);
+      const bestPosition = positions.find((pos) => pos.fits) ?? positions[0];
+      if (bestPosition) {
+        setPosition(bestPosition.side);
+      }
     };
 
     // Update position on resize and scroll
@@ -195,7 +198,7 @@ export function Tooltip({
           onMouseLeave: handleMouseLeave,
           onFocus: handleFocus,
           onBlur: handleBlur,
-        })}
+        } as any)}
       </>
     );
   }
@@ -259,7 +262,7 @@ export function Tooltip({
         onMouseLeave: handleMouseLeave,
         onFocus: handleFocus,
         onBlur: handleBlur,
-      })}
+      } as any)}
 
       {/* Tooltip content (rendered in portal to avoid z-index issues) */}
       <Portal>

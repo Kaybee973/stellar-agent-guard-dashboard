@@ -208,7 +208,7 @@ describe("LayoutShell", () => {
       return new Promise(resolve => setTimeout(resolve, 10));
     });
 
-    const backdrop = document.querySelector(".mobile-backdrop");
+    const backdrop = document.querySelector<HTMLElement>(".mobile-backdrop");
     assert.ok(backdrop, "Backdrop should exist when drawer is open");
     backdrop?.click();
 

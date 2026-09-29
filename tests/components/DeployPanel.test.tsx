@@ -2,8 +2,7 @@ import assert from "node:assert/strict";
 import { test, before, afterEach, describe } from "node:test";
 import { installDom, loadReact } from "../unit/domHarness.ts";
 import { DeployPanel } from "../../components/DeployPanel.tsx";
-import type { GuardContextValue } from "stellar-agent-guard-sdk";
-import { GuardContext } from "../../components/GuardProvider.tsx";
+import { GuardContext, type GuardContextValue } from "../../components/GuardProvider.tsx";
 
 describe("DeployPanel", () => {
   let dom: ReturnType<typeof installDom>;
