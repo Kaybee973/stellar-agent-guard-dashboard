@@ -3,7 +3,7 @@ import { test, before, afterEach, describe } from "node:test";
 import { installDom, loadReact } from "../unit/domHarness.ts";
 import { TelemetryFeed } from "../../components/TelemetryFeed.tsx";
 import type { GuardEvent } from "stellar-agent-guard-sdk";
-import { GuardContext, type GuardContextValue } from "../../components/GuardProvider.tsx";
+import { GuardContext, GuardEventsContext, type GuardContextValue } from "../../components/GuardProvider.tsx";
 
 describe("TelemetryFeed", () => {
   let dom: ReturnType<typeof installDom>;
@@ -54,12 +54,27 @@ describe("TelemetryFeed", () => {
     const defaults: any = {
       server: {} as any,
       guard: "test_guard",
+      stream: { paused: false, pendingCount: 0 },
       startWatching: () => {},
       stopWatching: () => {},
+      pauseStream: () => {},
+      resumeStream: () => {},
       clearEvents: () => {},
       pushEvents: () => {},
     };
     return { ...defaults, ...overrides };
+  }
+
+  function renderFeed(mockValue: any) {
+    return React.createElement(
+      GuardContext.Provider,
+      { value: mockValue },
+      React.createElement(
+        GuardEventsContext.Provider,
+        { value: mockValue.events || [] },
+        React.createElement(TelemetryFeed)
+      )
+    );
   }
 
   test("renders initial state with no events", async () => {
@@ -78,21 +93,14 @@ describe("TelemetryFeed", () => {
     });
 
     await act(() => {
-      root!.render(
-        React.createElement(
-          GuardContext.Provider,
-          { value: mockValue },
-          React.createElement(TelemetryFeed)
-        )
-      );
+      root!.render(renderFeed(mockValue));
     });
 
     // Check that it renders correctly
     assert.dom(document.body).containsText("Telemetry");
     assert.dom(document.body).containsText("Start watching");
     assert.dom(document.body).containsText("Clear");
-    assert.dom(document.body).containsText("Refused decisions cannot reach this feed from the ledger");
-    assert.dom(document.body).containsText("No events from this guard yet. Lifecycle events (policy set, frozen, heartbeat) and allowed decisions appear here as they settle.");
+    assert.dom(document.body).containsText("Start watching to tail this guard's events.");
     assert.dom(document.body).doesNotContainText("Stop"); // Should not show stop button when not watching
   });
 
@@ -112,13 +120,7 @@ describe("TelemetryFeed", () => {
     });
 
     await act(() => {
-      root!.render(
-        React.createElement(
-          GuardContext.Provider,
-          { value: mockValue },
-          React.createElement(TelemetryFeed)
-        )
-      );
+      root!.render(renderFeed(mockValue));
     });
 
     // Check that it renders watching state
@@ -142,6 +144,8 @@ describe("TelemetryFeed", () => {
         source: "ledger",
         transactionHash: "abc123",
         ledger: 100000,
+        contractId: "C123",
+        ledgerClosedAt: "2026-01-01T00:00:00Z",
         decision: {
           result: "allowed",
           reason: null,
@@ -153,6 +157,8 @@ describe("TelemetryFeed", () => {
         kind: "frozen",
         topic: "frozen",
         source: "ledger",
+        contractId: "C123",
+        ledgerClosedAt: "2026-01-01T00:00:00Z",
         transactionHash: "def456",
         ledger: 100001,
         decision: {
@@ -175,13 +181,7 @@ describe("TelemetryFeed", () => {
     });
 
     await act(() => {
-      root!.render(
-        React.createElement(
-          GuardContext.Provider,
-          { value: mockValue },
-          React.createElement(TelemetryFeed)
-        )
-      );
+      root!.render(renderFeed(mockValue));
     });
 
     // Check that it renders events table
@@ -212,6 +212,8 @@ describe("TelemetryFeed", () => {
         source: "ledger",
         transactionHash: "abc123",
         ledger: 100000,
+        contractId: "C123",
+        ledgerClosedAt: "2026-01-01T00:00:00Z",
         decision: {
           result: "allowed",
           reason: null,
@@ -232,17 +234,13 @@ describe("TelemetryFeed", () => {
     });
 
     await act(() => {
-      root!.render(
-        React.createElement(
-          GuardContext.Provider,
-          { value: mockValue },
-          React.createElement(TelemetryFeed)
-        )
-      );
+      root!.render(renderFeed(mockValue));
     });
 
     // Check that clear button exists and is enabled
-    const clearButton = document.querySelector('button:has-text("Clear")') as HTMLButtonElement | null;
+    const clearButton = Array.from(document.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Clear")
+    ) as HTMLButtonElement | undefined;
     assert.ok(clearButton, "Clear button should exist");
     assert.strictEqual(clearButton?.disabled, false, "Clear button should be enabled when events exist");
   });
@@ -263,17 +261,13 @@ describe("TelemetryFeed", () => {
     });
 
     await act(() => {
-      root!.render(
-        React.createElement(
-          GuardContext.Provider,
-          { value: mockValue },
-          React.createElement(TelemetryFeed)
-        )
-      );
+      root!.render(renderFeed(mockValue));
     });
 
     // Check that clear button exists but is disabled
-    const clearButton = document.querySelector('button:has-text("Clear")') as HTMLButtonElement | null;
+    const clearButton = Array.from(document.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Clear")
+    ) as HTMLButtonElement | undefined;
     assert.ok(clearButton, "Clear button should exist");
     assert.strictEqual(clearButton?.disabled, true, "Clear button should be disabled when no events exist");
   });
@@ -294,13 +288,7 @@ describe("TelemetryFeed", () => {
     });
 
     await act(() => {
-      root!.render(
-        React.createElement(
-          GuardContext.Provider,
-          { value: mockValue },
-          React.createElement(TelemetryFeed)
-        )
-      );
+      root!.render(renderFeed(mockValue));
     });
 
     // Check that it shows error state

@@ -38,10 +38,11 @@ describe("Tooltip", () => {
 
     await act(() => {
       root!.render(
-        React.createElement(Tooltip, {
-          children: triggerElement,
-          content: "Tooltip content",
-        })
+        React.createElement(
+          Tooltip,
+          { content: "Tooltip content" },
+          triggerElement
+        )
       );
     });
 
@@ -64,11 +65,14 @@ describe("Tooltip", () => {
 
     await act(() => {
       root!.render(
-        React.createElement(Tooltip, {
-          children: triggerElement,
-          content: "Tooltip content",
-          delay: 10, // Short delay for testing
-        })
+        React.createElement(
+          Tooltip,
+          {
+            content: "Tooltip content",
+            delay: 10, // Short delay for testing
+          },
+          triggerElement
+        )
       );
     });
 
@@ -85,7 +89,9 @@ describe("Tooltip", () => {
 
     // Tooltip should now be visible
     assert.ok(document.querySelector(".tooltip"), "Tooltip should be visible after mouse enter delay");
-    assert.ok(document.querySelector('.tooltip-content:has-text("Tooltip content")'), "Tooltip should contain the correct content");
+    const contentEl = document.querySelector(".tooltip-content");
+    assert.ok(contentEl, "Tooltip content element should exist");
+    assert.strictEqual(contentEl?.textContent, "Tooltip content");
     assert.strictEqual(trigger?.getAttribute("aria-describedby"), "tooltip-content", "aria-describedby should point to tooltip content");
 
     // Simulate mouse leave
@@ -110,11 +116,14 @@ describe("Tooltip", () => {
 
     await act(() => {
       root!.render(
-        React.createElement(Tooltip, {
-          children: triggerElement,
-          content: "Tooltip content",
-          delay: 10, // Short delay for testing
-        })
+        React.createElement(
+          Tooltip,
+          {
+            content: "Tooltip content",
+            delay: 10, // Short delay for testing
+          },
+          triggerElement
+        )
       );
     });
 
@@ -132,7 +141,9 @@ describe("Tooltip", () => {
 
     // Tooltip should now be visible
     assert.ok(document.querySelector(".tooltip"), "Tooltip should be visible after focus delay");
-    assert.ok(document.querySelector('.tooltip-content:has-text("Tooltip content")'), "Tooltip should contain the correct content");
+    const contentEl = document.querySelector(".tooltip-content");
+    assert.ok(contentEl, "Tooltip content element should exist");
+    assert.strictEqual(contentEl?.textContent, "Tooltip content");
     assert.strictEqual(trigger?.getAttribute("aria-describedby"), "tooltip-content", "aria-describedby should point to tooltip content");
 
     // Simulate blur
@@ -157,11 +168,14 @@ describe("Tooltip", () => {
 
     await act(() => {
       root!.render(
-        React.createElement(Tooltip, {
-          children: triggerElement,
-          content: "Tooltip content",
-          delay: 10, // Short delay for testing
-        })
+        React.createElement(
+          Tooltip,
+          {
+            content: "Tooltip content",
+            delay: 10, // Short delay for testing
+          },
+          triggerElement
+        )
       );
     });
 
@@ -212,12 +226,15 @@ describe("Tooltip", () => {
 
     await act(() => {
       root!.render(
-        React.createElement(Tooltip, {
-          children: triggerElement,
-          content: "This is a very long tooltip content that should trigger boundary detection",
-          delay: 10,
-          distance: 5,
-        })
+        React.createElement(
+          Tooltip,
+          {
+            content: "This is a very long tooltip content that should trigger boundary detection",
+            delay: 10,
+            distance: 5,
+          },
+          triggerElement
+        )
       );
     });
 
@@ -261,10 +278,11 @@ describe("Tooltip", () => {
 
     await act(() => {
       root!.render(
-        React.createElement(Tooltip, {
-          children: triggerElement,
-          content: "Tooltip content",
-        })
+        React.createElement(
+          Tooltip,
+          { content: "Tooltip content" },
+          triggerElement
+        )
       );
     });
 

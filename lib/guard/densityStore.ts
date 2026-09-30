@@ -1,11 +1,12 @@
 export type Density = "comfortable" | "compact";
 
-export type Unsubscribe = (() => void) & { (): Unsubscribe };
+export type Unsubscribe = () => void;
 
 export interface DensityStore {
   subscribe(fn: (value: Density) => void): Unsubscribe;
   set(value: Density): void;
   update(updater: (value: Density) => Density): void;
+  get(): Density;
 }
 
 function createDensityStore(initial: Density = "comfortable"): DensityStore {
@@ -15,12 +16,9 @@ function createDensityStore(initial: Density = "comfortable"): DensityStore {
   return {
     subscribe(fn: (value: Density) => void) {
       subscribers.add(fn);
-      const unsub = () => {
-        fn(current);
+      return () => {
         subscribers.delete(fn);
-        return unsub;
       };
-      return unsub;
     },
     set(value: Density) {
       current = value;
@@ -30,6 +28,9 @@ function createDensityStore(initial: Density = "comfortable"): DensityStore {
     },
     update(updater: (value: Density) => Density) {
       this.set(updater(current));
+    },
+    get() {
+      return current;
     },
   };
 }

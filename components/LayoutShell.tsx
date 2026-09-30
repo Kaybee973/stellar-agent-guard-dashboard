@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { DemoBadge } from "./DemoBadge.tsx";
 import { Tabs } from "./bits.tsx";
 import { AriaAnnouncer } from "./AriaAnnouncer.tsx";
-import { PwaRegistrar } from "./PwaRegistrar.tsx";
 import { ThemeProvider } from "./ThemeProvider.tsx";
 import { ThemeToggle } from "./ThemeToggle.tsx";
 
@@ -26,6 +25,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saved = localStorage.getItem("sidebar-collapsed");
     if (saved === "true" || saved === "false") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSidebarCollapsed(saved === "true");
     }
   }, []);
@@ -81,7 +81,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   }, [drawerOpen]);
 
   // Determine if we're on mobile (width < 768px)
-  const isMobile = window.innerWidth < 768;
+  const isMobile = typeof window !== "undefined" ? window.innerWidth < 768 : false;
 
   // Handle resize to close drawer when going from mobile to desktop
   useEffect(() => {
@@ -98,7 +98,6 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <ThemeProvider>
-        <PwaRegistrar />
         <AriaAnnouncer />
         <div className="shell">
           {/* Mobile-only hamburger menu button */}
@@ -178,7 +177,6 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
             <div className="content">{children}</div>
           </main>
         </div>
-      </ThemeProvider>
 
       {/* Mobile drawer backdrop */}
       {drawerOpen && (
@@ -216,6 +214,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           </nav>
         </div>
       )}
+      </ThemeProvider>
     </>
   );
 }

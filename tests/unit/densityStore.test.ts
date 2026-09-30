@@ -26,14 +26,7 @@ describe("densityStore", () => {
     // Initialize the store
     unsubscribe = initDensityStore();
 
-    // Subscribe to get the current value
-    let currentValue: "comfortable" | "compact" = "comfortable"; // default
-    const sub = density.subscribe((value) => {
-      currentValue = value;
-    })(); // Call immediately to get current value
-    sub();
-
-    assert.strictEqual(currentValue, "comfortable");
+    assert.strictEqual(density.get(), "comfortable");
   });
 
   test("initializes from localStorage if set", () => {
@@ -43,14 +36,7 @@ describe("densityStore", () => {
     // Initialize the store
     unsubscribe = initDensityStore();
 
-    // Subscribe to get the current value
-    let currentValue: "comfortable" | "compact" = "comfortable";
-    const sub = density.subscribe((value) => {
-      currentValue = value;
-    })(); // Call immediately to get current value
-    sub();
-
-    assert.strictEqual(currentValue, "compact");
+    assert.strictEqual(density.get(), "compact");
   });
 
   test("ignores invalid localStorage values", () => {
@@ -60,15 +46,8 @@ describe("densityStore", () => {
     // Initialize the store
     unsubscribe = initDensityStore();
 
-    // Subscribe to get the current value
-    let currentValue: "comfortable" | "compact" = "comfortable";
-    const sub = density.subscribe((value) => {
-      currentValue = value;
-    })(); // Call immediately to get current value
-    sub();
-
     // Should default to comfortable
-    assert.strictEqual(currentValue, "comfortable");
+    assert.strictEqual(density.get(), "comfortable");
   });
 
   test("updates localStorage when density changes", () => {

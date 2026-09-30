@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { LayoutShell } from "../components/LayoutShell.tsx";
+import { PwaRegistrar } from "../components/PwaRegistrar.tsx";
+import { PWA_MANIFEST_PATH, PWA_THEME_COLOR } from "../lib/guard/pwa.ts";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Stellar Agent Guard — operator console",
@@ -7,7 +10,7 @@ export const metadata: Metadata = {
     "Configure, watch and freeze stellar-agent-guard smart accounts. Every action is signed in your own wallet and every number is read from the chain.",
   // Ties the document to the web app manifest, which is what makes the page
   // installable as a standalone app on supported browsers.
-  manifest: "/manifest.json",
+  manifest: PWA_MANIFEST_PATH,
   applicationName: "Stellar Agent Guard",
   icons: {
     icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
@@ -27,7 +30,7 @@ export const metadata: Metadata = {
  * manifest's `theme_color`.
  */
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: PWA_THEME_COLOR,
   colorScheme: "dark light",
 };
 
@@ -52,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <PwaRegistrar />
         <LayoutShell>{children}</LayoutShell>
       </body>
     </html>

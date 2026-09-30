@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 /**
@@ -8,28 +8,25 @@ import { createPortal } from "react-dom";
  * Useful for tooltips, modals, and other UI elements that need to break out of their container.
  */
 export function Portal({ children }: { children: React.ReactNode }) {
-  const portalRef = useRef<HTMLElement | null>(null);
+  const [container, setContainer] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    // Create a div for the portal if it doesn't exist
-    if (!portalRef.current) {
-      portalRef.current = document.createElement("div");
-      portalRef.current.setAttribute("data-portal", "");
-      document.body.appendChild(portalRef.current);
-    }
+    const el = document.createElement("div");
+    el.setAttribute("data-portal", "");
+    document.body.appendChild(el);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setContainer(el);
 
-    // Clean up on unmount
     return () => {
-      if (portalRef.current && portalRef.current.parentNode) {
-        portalRef.current.parentNode.removeChild(portalRef.current);
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
       }
     };
   }, []);
 
-  // Return null if the portal container hasn't been created yet (e.g., during SSR)
-  if (!portalRef.current) {
+  if (!container) {
     return null;
   }
 
-  return createPortal(children, portalRef.current);
+  return createPortal(children, container);
 }

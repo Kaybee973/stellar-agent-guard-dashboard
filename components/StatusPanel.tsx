@@ -26,15 +26,14 @@ export function StatusPanel() {
   // Initialize density store from localStorage
   useEffect(() => {
     const unsubscribe = initDensityStore();
+    // Initialize current state
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDensityState(density.get());
+
     // Subscribe to density store changes
     const densityUnsubscribe = density.subscribe((value) => {
       setDensityState(value);
     });
-
-    // Initialize current state
-    density.subscribe((value) => {
-      setDensityState(value);
-    })();
 
     return () => {
       unsubscribe();

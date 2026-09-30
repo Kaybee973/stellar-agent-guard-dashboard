@@ -5,51 +5,6 @@ import { StatusPanel } from "../../components/StatusPanel.tsx";
 import type { GuardSnapshot } from "../../lib/guard/guardOps.ts";
 import { GuardContext, type GuardContextValue } from "../../components/GuardProvider.tsx";
 
-// Mock localStorage for density store
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string): string | null => store[key] ?? null,
-    setItem: (key: string, value: string) => {
-      store[key] = value;
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    }
-  };
-})();
-
-let dom: ReturnType<typeof installDom>;
-let React: Awaited<ReturnType<typeof loadReact>>["react"];
-let createRoot: Awaited<ReturnType<typeof loadReact>>["createRoot"];
-let act: Awaited<ReturnType<typeof loadReact>>["act"];
-let root: ReturnType<typeof createRoot> | null = null;
-
-before(async () => {
-  // Mock localStorage
-  Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
-
-  dom = installDom();
-  const reactDeps = await loadReact();
-  React = reactDeps.react;
-  createRoot = reactDeps.createRoot;
-  act = reactDeps.act;
-});
-
-afterEach(() => {
-  if (root) {
-    act(() => {
-      root!.unmount();
-    });
-    root = null;
-  }
-  document.body.innerHTML = "";
-  localStorageMock.clear();
-});
-
 describe("StatusPanel", () => {
   let dom: ReturnType<typeof installDom>;
   let React: Awaited<ReturnType<typeof loadReact>>["react"];
@@ -97,7 +52,8 @@ describe("StatusPanel", () => {
 
   // Mock data for different status states
   const mockSnapshotActive: GuardSnapshot = {
-    fetchedAt: Date.now(),
+    guard: "C123",
+    fetchedAt: new Date().toISOString(),
     status: {
       ok: true,
       value: {
@@ -112,7 +68,7 @@ describe("StatusPanel", () => {
       ok: true,
       value: {
         window_cap: 5000n,
-        window_secs: 3600,
+        window_secs: 3600n,
         per_tx_cap: 1000n,
         assets: [],
         recipients: [],
@@ -125,18 +81,26 @@ describe("StatusPanel", () => {
       },
     },
     window: {
-      total: 1000n,
-      entries: [],
+      ok: true,
+      value: {
+        total: 1000n,
+        entries: [],
+      },
     },
     identity: {
-      reportedWasmHash: "abc123",
-      fetchedSha256: "def456",
-      bytes: 12345,
+      ok: true,
+      value: {
+        match: true,
+        reportedWasmHash: "abc123",
+        fetchedSha256: "def456",
+        bytes: 12345,
+      },
     },
   };
 
   const mockSnapshotFrozen: GuardSnapshot = {
-    fetchedAt: Date.now(),
+    guard: "C123",
+    fetchedAt: new Date().toISOString(),
     status: {
       ok: true,
       value: {
@@ -151,7 +115,7 @@ describe("StatusPanel", () => {
       ok: true,
       value: {
         window_cap: 5000n,
-        window_secs: 3600,
+        window_secs: 3600n,
         per_tx_cap: 1000n,
         assets: [],
         recipients: [],
@@ -164,18 +128,26 @@ describe("StatusPanel", () => {
       },
     },
     window: {
-      total: 1000n,
-      entries: [],
+      ok: true,
+      value: {
+        total: 1000n,
+        entries: [],
+      },
     },
     identity: {
-      reportedWasmHash: "abc123",
-      fetchedSha256: "def456",
-      bytes: 12345,
+      ok: true,
+      value: {
+        match: true,
+        reportedWasmHash: "abc123",
+        fetchedSha256: "def456",
+        bytes: 12345,
+      },
     },
   };
 
   const mockSnapshotExpired: GuardSnapshot = {
-    fetchedAt: Date.now(),
+    guard: "C123",
+    fetchedAt: new Date().toISOString(),
     status: {
       ok: true,
       value: {
@@ -190,7 +162,7 @@ describe("StatusPanel", () => {
       ok: true,
       value: {
         window_cap: 5000n,
-        window_secs: 3600,
+        window_secs: 3600n,
         per_tx_cap: 1000n,
         assets: [],
         recipients: [],
@@ -203,18 +175,26 @@ describe("StatusPanel", () => {
       },
     },
     window: {
-      total: 1000n,
-      entries: [],
+      ok: true,
+      value: {
+        total: 1000n,
+        entries: [],
+      },
     },
     identity: {
-      reportedWasmHash: "abc123",
-      fetchedSha256: "def456",
-      bytes: 12345,
+      ok: true,
+      value: {
+        match: true,
+        reportedWasmHash: "abc123",
+        fetchedSha256: "def456",
+        bytes: 12345,
+      },
     },
   };
 
   const mockSnapshotNoPolicy: GuardSnapshot = {
-    fetchedAt: Date.now(),
+    guard: "C123",
+    fetchedAt: new Date().toISOString(),
     status: {
       ok: true,
       value: {
@@ -227,16 +207,23 @@ describe("StatusPanel", () => {
     },
     policy: {
       ok: false,
-      error: new Error("Policy not found"),
+      error: "Policy not found",
     },
     window: {
-      total: 0n,
-      entries: [],
+      ok: true,
+      value: {
+        total: 0n,
+        entries: [],
+      },
     },
     identity: {
-      reportedWasmHash: "abc123",
-      fetchedSha256: "def456",
-      bytes: 12345,
+      ok: true,
+      value: {
+        match: true,
+        reportedWasmHash: "abc123",
+        fetchedSha256: "def456",
+        bytes: 12345,
+      },
     },
   };
 

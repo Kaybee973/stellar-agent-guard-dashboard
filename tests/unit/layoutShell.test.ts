@@ -294,7 +294,7 @@ describe("LayoutShell", () => {
       configurable: true,
       value: 1024,
     });
-    window.dispatchEvent(new Event("resize"));
+    window.dispatchEvent(new window.Event("resize"));
 
     // Wait for state update
     await act(() => {

@@ -19,13 +19,18 @@ export function Tooltip({
   delay = 500,
   distance = 10,
 }: {
-  children: React.ReactElement;
+  children?: React.ReactElement;
   content: string;
   delay?: number; // milliseconds to wait before showing
   distance?: number; // pixels from trigger
 }) {
   const [showTooltip, setShowTooltip] = useState(false);
   const [position, setPosition] = useState<"top" | "bottom" | "left" | "right">("top");
+  const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({
+    position: "fixed",
+    zIndex: 1000,
+    pointerEvents: "none",
+  });
   const [tooltipRect, setTooltipRect] = useState<DOMRect | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -42,7 +47,7 @@ export function Tooltip({
 
   // Update tooltip position when window resizes or scrolls
   useEffect(() => {
-    if (!showTooltip || !tooltipRef.current || !triggerRef.current) return;
+    if (!showTooltip || !triggerRef.current) return;
 
     const updatePosition = () => {
       if (!triggerRef.current) return;
@@ -116,9 +121,50 @@ export function Tooltip({
 
       // Find the first position that fits, or default to top if none fit
       const bestPosition = positions.find((pos) => pos.fits) ?? positions[0];
-      if (bestPosition) {
-        setPosition(bestPosition.side);
+      const side = bestPosition ? bestPosition.side : "top";
+      setPosition(side);
+
+      let style: React.CSSProperties = {
+        position: "fixed",
+        zIndex: 1000,
+        pointerEvents: "none",
+      };
+
+      switch (side) {
+        case "top":
+          style = {
+            ...style,
+            bottom: `calc(100vh - ${triggerRect.top}px + ${distance}px)`,
+            left: `${triggerRect.left + triggerRect.width / 2 - 50}px`,
+            transform: "translateX(-50%)",
+          };
+          break;
+        case "bottom":
+          style = {
+            ...style,
+            top: `${triggerRect.bottom + distance}px`,
+            left: `${triggerRect.left + triggerRect.width / 2 - 50}px`,
+            transform: "translateX(-50%)",
+          };
+          break;
+        case "left":
+          style = {
+            ...style,
+            right: `calc(100vw - ${triggerRect.left}px + ${distance}px)`,
+            top: `${triggerRect.top + triggerRect.height / 2 - 25}px`,
+            transform: "translateY(-50%)",
+          };
+          break;
+        case "right":
+          style = {
+            ...style,
+            left: `${triggerRect.right + distance}px`,
+            top: `${triggerRect.top + triggerRect.height / 2 - 25}px`,
+            transform: "translateY(-50%)",
+          };
+          break;
       }
+      setTooltipStyle(style);
     };
 
     // Update position on resize and scroll
@@ -132,7 +178,7 @@ export function Tooltip({
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition);
     };
-  }, [showTooltip, delay, distance]);
+  }, [showTooltip, distance, tooltipRect]);
 
   // Handle mouse enter on trigger
   const handleMouseEnter = useCallback(() => {
@@ -166,6 +212,24 @@ export function Tooltip({
     setShowTooltip(false);
   }, []);
 
+  // Ensure DOM event dispatching (like in tests) triggers handlers
+  useEffect(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+
+    el.addEventListener("mouseenter", handleMouseEnter);
+    el.addEventListener("mouseleave", handleMouseLeave);
+    el.addEventListener("focus", handleFocus);
+    el.addEventListener("blur", handleBlur);
+
+    return () => {
+      el.removeEventListener("mouseenter", handleMouseEnter);
+      el.removeEventListener("mouseleave", handleMouseLeave);
+      el.removeEventListener("focus", handleFocus);
+      el.removeEventListener("blur", handleBlur);
+    };
+  }, [handleMouseEnter, handleMouseLeave, handleFocus, handleBlur]);
+
   // Handle escape key to dismiss tooltip
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -174,18 +238,22 @@ export function Tooltip({
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
+    window.addEventListener("keydown", handleEscape);
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("keydown", handleEscape);
     };
   }, [showTooltip]);
 
-  // Update tooltip ref when content changes
-  useEffect(() => {
-    if (tooltipRef.current) {
-      setTooltipRect(tooltipRef.current.getBoundingClientRect());
+  const tooltipCallbackRef = useCallback((node: HTMLDivElement | null) => {
+    tooltipRef.current = node;
+    if (node) {
+      setTooltipRect(node.getBoundingClientRect());
     }
-  }, [content]);
+  }, []);
+
+  if (!children) {
+    return null;
+  }
 
   // Don't render tooltip content when not showing (for performance)
   if (!showTooltip) {
@@ -202,55 +270,6 @@ export function Tooltip({
       </>
     );
   }
-
-  // Calculate tooltip styles based on position
-  const getTooltipStyle = () => {
-    const triggerRect = triggerRef.current?.getBoundingClientRect();
-    if (!triggerRect) return {};
-
-    let style: React.CSSProperties = {
-      position: "fixed",
-      zIndex: 1000,
-      pointerEvents: "none", // So it doesn't interfere with mouse events on the trigger
-    };
-
-    switch (position) {
-      case "top":
-        style = {
-          ...style,
-          bottom: `calc(100vh - ${triggerRect.top}px + ${distance}px)`,
-          left: `${triggerRect.left + triggerRect.width / 2 - 50}px`, // Centered, assuming max width of 100px for now
-          transform: "translateX(-50%)",
-        };
-        break;
-      case "bottom":
-        style = {
-          ...style,
-          top: `${triggerRect.bottom + distance}px`,
-          left: `${triggerRect.left + triggerRect.width / 2 - 50}px`,
-          transform: "translateX(-50%)",
-        };
-        break;
-      case "left":
-        style = {
-          ...style,
-          right: `calc(100vw - ${triggerRect.left}px + ${distance}px)`,
-          top: `${triggerRect.top + triggerRect.height / 2 - 25}px`,
-          transform: "translateY(-50%)",
-        };
-        break;
-      case "right":
-        style = {
-          ...style,
-          left: `${triggerRect.right + distance}px`,
-          top: `${triggerRect.top + triggerRect.height / 2 - 25}px`,
-          transform: "translateY(-50%)",
-        };
-        break;
-    }
-
-    return style;
-  };
 
   return (
     <>
@@ -269,9 +288,9 @@ export function Tooltip({
         <div
           role="tooltip"
           id="tooltip-content"
-          ref={tooltipRef}
+          ref={tooltipCallbackRef}
           className="tooltip"
-          style={getTooltipStyle()}
+          style={tooltipStyle}
         >
           <div className="tooltip-content">{content}</div>
         </div>

@@ -43,6 +43,19 @@ export function installDom(): JSDOM {
   define("document", dom.window.document);
   define("navigator", dom.window.navigator);
   define("localStorage", dom.window.localStorage);
+  if (typeof (dom.window as any).matchMedia !== "function") {
+    (dom.window as any).matchMedia = (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    });
+  }
+  define("matchMedia", (dom.window as any).matchMedia);
   define("IS_REACT_ACT_ENVIRONMENT", true);
 
   installed = dom;
