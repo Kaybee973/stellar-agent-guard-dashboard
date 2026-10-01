@@ -1,11 +1,22 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { deadManRemaining, describePolicy, isDeadManFrozen } from "stellar-agent-guard-sdk";
 import { useGuard } from "./GuardProvider.tsx";
-import { ErrorBlock, Read, Stat, relativeTime, short } from "./bits.tsx";
+import {
+  ErrorBlock,
+  Read,
+  ReadSkeleton,
+  ReadWithRetry,
+  Stat,
+  relativeTime,
+  short,
+} from "./bits.tsx";
+import { CopyButton } from "./CopyButton.tsx";
 import { PHASE1_ARTIFACT, NETWORK } from "../lib/guard/network.ts";
 import { compilePrintReport } from "../lib/guard/printReport.ts";
-
+import { calculateVelocity } from "../lib/guard/velocity.ts";
+import { density, initDensityStore } from "../lib/guard/densityStore.ts";
 
 /**
  * The guard's live state, every field read from the chain on each refresh.
@@ -17,9 +28,12 @@ import { compilePrintReport } from "../lib/guard/printReport.ts";
  * both, which is why it sits next to the panic button.
  */
 export function StatusPanel() {
-  const { snapshot, snapshotError, refreshing, refresh, guard, wallet } = useGuard();
+  const { snapshot, snapshotError, refreshing, refresh, guard, wallet, retryRead, retryingField } =
+    useGuard();
 
-  const printReport = snapshot ? compilePrintReport(snapshot, NETWORK.name, wallet?.address || "Disconnected") : null;
+  const printReport = snapshot
+    ? compilePrintReport(snapshot, NETWORK.name, wallet?.address || "Disconnected")
+    : null;
 
   return (
     <div className="panel">
@@ -31,14 +45,18 @@ export function StatusPanel() {
           <button className="secondary no-print" onClick={() => window.print()}>
             Print Compliance Report
           </button>
-          <button className="secondary no-print" onClick={() => void refresh()} disabled={refreshing}>
+          <button
+            className="secondary no-print"
+            onClick={() => void refresh()}
+            disabled={refreshing}
+          >
             {refreshing ? "Reading…" : "Refresh"}
           </button>
         </div>
       </div>
 
       <p className="tiny muted" style={{ marginTop: 10 }}>
-        <span className="mono">{guard}</span>
+        <span className="mono">{guard}</span> <CopyButton value={guard} label="guard address" />
       </p>
 
       {snapshotError && (
@@ -52,14 +70,22 @@ export function StatusPanel() {
 
       {snapshot && (
         <>
-          <div className="grid" style={{ marginTop: 12 }}>
+          <div className={`grid ${densityState === "compact" ? "compact" : ""}`} style={{ marginTop: 12 }}>
             <Stat
               label="Admin freeze"
-              tone={snapshot.status.ok ? (snapshot.status.value.admin_frozen ? "danger" : "ok") : undefined}
+              tone={
+                snapshot.status.ok
+                  ? snapshot.status.value.admin_frozen
+                    ? "danger"
+                    : "ok"
+                  : undefined
+              }
               value={
-                <Read
+                <ReadWithRetry
                   result={snapshot.status}
                   label="status()"
+                  onRetry={() => void retryRead("status")}
+                  retrying={retryingField === "status"}
                   render={(status) => (status.admin_frozen ? "FROZEN" : "clear")}
                 />
               }
@@ -68,14 +94,22 @@ export function StatusPanel() {
             <Stat
               label="Dead-man switch"
               tone={
-                snapshot.status.ok ? (snapshot.status.value.heartbeat_expired ? "danger" : "ok") : undefined
+                snapshot.status.ok
+                  ? snapshot.status.value.heartbeat_expired
+                    ? "danger"
+                    : "ok"
+                  : undefined
               }
               value={
                 <Read
                   result={snapshot.status}
                   label="status()"
                   render={(status) =>
-                    isDeadManFrozen(status) ? "FIRED" : status.heartbeat_expired ? "expired" : "within grace"
+                    isDeadManFrozen(status)
+                      ? "FIRED"
+                      : status.heartbeat_expired
+                        ? "expired"
+                        : "within grace"
                   }
                 />
               }
@@ -95,7 +129,13 @@ export function StatusPanel() {
             />
             <Stat
               label="Policy installed"
-              value={<Read result={snapshot.status} label="status()" render={(s) => (s.has_policy ? "yes" : "no — default deny")} />}
+              value={
+                <Read
+                  result={snapshot.status}
+                  label="status()"
+                  render={(s) => (s.has_policy ? "yes" : "no — default deny")}
+                />
+              }
               note="With no policy the account refuses every call"
             />
             <Stat
@@ -116,9 +156,12 @@ export function StatusPanel() {
           </div>
 
           <h3>Rolling window</h3>
-          <Read
+          {retryingField === "window" && <ReadSkeleton label="window" />}
+          <ReadWithRetry
             result={snapshot.window}
             label="Window"
+            onRetry={() => void retryRead("window")}
+            retrying={retryingField === "window"}
             render={(window) => {
               const policy = snapshot.policy.ok ? snapshot.policy.value : null;
               if (!window || !policy) {
@@ -128,19 +171,105 @@ export function StatusPanel() {
               }
               const cap = policy.window_cap;
               const pct = cap > 0n ? Number((window.total * 100n) / cap) : null;
+
+              const now = snapshot.status.ok ? snapshot.status.value.now : null;
+              let velocityStats = null;
+              if (now !== null) {
+                const remaining = cap > 0n ? (cap > window.total ? cap - window.total : 0n) : null;
+                const metrics = calculateVelocity(window.entries, now, remaining);
+                const exhaust = metrics.exhaustionMinutes;
+
+                // orange/red if exhaustion < 30 minutes
+                const isCritical = exhaust !== null && exhaust < 30;
+                const velocityTone = isCritical ? "danger" : "ok";
+
+                velocityStats = (
+                  <>
+                    <h4 style={{ marginTop: 20 }}>Spending Velocity</h4>
+                    <div className="grid">
+                      <Stat label="1m Velocity" value={metrics.spend1m.toString()} />
+                      <Stat
+                        label="15m Velocity"
+                        value={metrics.spend15m.toString()}
+                        tone={isCritical ? "danger" : undefined}
+                        note={
+                          exhaust !== null
+                            ? `Cap exhaustion in ~${Math.round(exhaust)}m`
+                            : undefined
+                        }
+                      />
+                      <Stat label="1h Velocity" value={metrics.spend1h.toString()} />
+                    </div>
+                    {cap > 0n && (
+                      <div style={{ marginTop: 12 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontSize: "0.8em",
+                            marginBottom: 4,
+                          }}
+                        >
+                          <span>Window Utilization</span>
+                          <span style={{ color: isCritical ? "var(--danger)" : undefined }}>
+                            {pct}%
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            width: "100%",
+                            backgroundColor: "#222",
+                            height: 12,
+                            borderRadius: 6,
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: `${Math.min(pct || 0, 100)}%`,
+                              backgroundColor: isCritical
+                                ? "var(--danger)"
+                                : pct && pct > 80
+                                  ? "var(--warn)"
+                                  : "var(--ok)",
+                              height: "100%",
+                              transition: "width 0.3s ease",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              }
+
               return (
-                <div className="grid">
-                  <Stat label="Spent in window" value={window.total.toString()} note={pct === null ? "no window cap set" : `${pct}% of the ${cap} cap`} />
-                  <Stat label="Window length" value={`${policy.window_secs}s`} note={`${window.entries.length} entry(ies) on the ledger`} />
-                </div>
+                <>
+                  <div className="grid">
+                    <Stat
+                      label="Spent in window"
+                      value={window.total.toString()}
+                      note={pct === null ? "no window cap set" : `${pct}% of the ${cap} cap`}
+                    />
+                    <Stat
+                      label="Window length"
+                      value={`${policy.window_secs}s`}
+                      note={`${window.entries.length} entry(ies) on the ledger`}
+                    />
+                  </div>
+                  {velocityStats}
+                </>
               );
             }}
           />
 
           <h3>Policy in force</h3>
-          <Read
+          {retryingField === "policy" && <ReadSkeleton label="policy" />}
+          <ReadWithRetry
             result={snapshot.policy}
             label="policy()"
+            onRetry={() => void retryRead("policy")}
+            retrying={retryingField === "policy"}
             render={(policy) =>
               policy === null ? (
                 <p className="tiny muted">No policy installed — the account is in default-deny.</p>
@@ -148,15 +277,37 @@ export function StatusPanel() {
                 <>
                   <p className="tiny mono">{describePolicy(policy)}</p>
                   <div className="grid">
-                    <Stat label="Per-transaction cap" value={policy.per_tx_cap === 0n ? "off" : policy.per_tx_cap.toString()} />
-                    <Stat label="Rolling cap" value={policy.window_cap === 0n ? "off" : `${policy.window_cap} / ${policy.window_secs}s`} />
-                    <Stat label="Assets" value={policy.assets.length} note="SAC tokens whose transfers are fully enforced" />
+                    <Stat
+                      label="Per-transaction cap"
+                      value={policy.per_tx_cap === 0n ? "off" : policy.per_tx_cap.toString()}
+                    />
+                    <Stat
+                      label="Rolling cap"
+                      value={
+                        policy.window_cap === 0n
+                          ? "off"
+                          : `${policy.window_cap} / ${policy.window_secs}s`
+                      }
+                    />
+                    <Stat
+                      label="Assets"
+                      value={policy.assets.length}
+                      note="SAC tokens whose transfers are fully enforced"
+                    />
                     <Stat
                       label="Recipients"
                       value={policy.allow_any_recipient ? "any" : policy.recipients.length}
-                      note={policy.allow_any_recipient ? "allowlist bypassed" : "allowlisted destinations"}
+                      note={
+                        policy.allow_any_recipient
+                          ? "allowlist bypassed"
+                          : "allowlisted destinations"
+                      }
                     />
-                    <Stat label="Protocols" value={policy.protocols.length} note="allowlisted non-asset contracts" />
+                    <Stat
+                      label="Protocols"
+                      value={policy.protocols.length}
+                      note="allowlisted non-asset contracts"
+                    />
                     <Stat
                       label="Account"
                       value={policy.paused ? "PAUSED" : "active"}
@@ -174,18 +325,25 @@ export function StatusPanel() {
           />
 
           <h3>Artifact identity</h3>
-          <Read
+          {retryingField === "identity" && <ReadSkeleton label="identity" />}
+          <ReadWithRetry
             result={snapshot.identity}
             label="wasm identity"
+            onRetry={() => void retryRead("identity")}
+            retrying={retryingField === "identity"}
             render={(identity) => (
               <>
-                <div className="grid">
+                <div className={`grid ${densityState === "compact" ? "compact" : ""}`}>
                   <Stat
                     label="Ledger reports"
                     value={
                       <>
-                        <span className="mono tiny no-print">{short(identity.reportedWasmHash ?? "-", 10, 6)}</span>
-                        <span className="mono tiny print-only">{identity.reportedWasmHash ?? "-"}</span>
+                        <span className="mono tiny no-print">
+                          {short(identity.reportedWasmHash ?? "-", 10, 6)}
+                        </span>
+                        <span className="mono tiny print-only">
+                          {identity.reportedWasmHash ?? "-"}
+                        </span>
                       </>
                     }
                   />
@@ -193,7 +351,9 @@ export function StatusPanel() {
                     label="Fetched bytes hash to"
                     value={
                       <>
-                        <span className="mono tiny no-print">{short(identity.fetchedSha256, 10, 6)}</span>
+                        <span className="mono tiny no-print">
+                          {short(identity.fetchedSha256, 10, 6)}
+                        </span>
                         <span className="mono tiny print-only">{identity.fetchedSha256}</span>
                       </>
                     }
@@ -223,13 +383,27 @@ export function StatusPanel() {
       {printReport && (
         <div className="print-only print-report">
           <h2>Compliance Audit Report</h2>
-          <p><strong>Timestamp:</strong> {printReport.timestamp}</p>
-          <p><strong>Network:</strong> {printReport.network}</p>
-          <p><strong>Contract ID:</strong> <span className="mono">{printReport.contractId}</span></p>
-          <p><strong>Bytecode Hash:</strong> <span className="mono">{printReport.bytecodeHash}</span></p>
-          <p><strong>Admin Key:</strong> <span className="mono">{printReport.adminKey}</span></p>
-          <p><strong>DMS Status:</strong> {printReport.dmsStatus}</p>
-          <p><strong>Policy Rules:</strong> {printReport.policyRules}</p>
+          <p>
+            <strong>Timestamp:</strong> {printReport.timestamp}
+          </p>
+          <p>
+            <strong>Network:</strong> {printReport.network}
+          </p>
+          <p>
+            <strong>Contract ID:</strong> <span className="mono">{printReport.contractId}</span>
+          </p>
+          <p>
+            <strong>Bytecode Hash:</strong> <span className="mono">{printReport.bytecodeHash}</span>
+          </p>
+          <p>
+            <strong>Admin Key:</strong> <span className="mono">{printReport.adminKey}</span>
+          </p>
+          <p>
+            <strong>DMS Status:</strong> {printReport.dmsStatus}
+          </p>
+          <p>
+            <strong>Policy Rules:</strong> {printReport.policyRules}
+          </p>
           <div>
             <strong>Allowlists:</strong>
             <ul>
