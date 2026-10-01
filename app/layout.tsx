@@ -55,8 +55,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <PwaRegistrar />
-        <LayoutShell>{children}</LayoutShell>
+        <ThemeProvider>
+          <PwaRegistrar />
+          <AriaAnnouncer />
+          <div className="shell">
+            <DemoBadge />
+            <header className="top">
+              <div className="brand">
+                <h1>Stellar Agent Guard</h1>
+                <span>operator console</span>
+              </div>
+              <div className="row">
+                <span className="pill">Soroban testnet</span>
+                <a href="https://github.com/aigbagbobila/stellar-agent-guard-contracts">
+                  contracts
+                </a>
+                <a href="https://github.com/aigbagbobila/stellar-agent-guard-sdk">sdk</a>
+              </div>
+            </header>
+            <div className="row" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
+              <Tabs />
+              <ThemeToggle />
+            </div>
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );
