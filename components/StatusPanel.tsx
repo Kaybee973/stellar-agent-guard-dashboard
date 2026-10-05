@@ -35,7 +35,7 @@ import {
 } from "../lib/guard/dmsSimulator.ts";
 import { evaluateDmsAlert, formatDmsDuration, type DmsAlert } from "../lib/guard/dmsAlert.ts";
 import { calculateVelocity } from "../lib/guard/velocity.ts";
-import { density, initDensityStore } from "../lib/guard/densityStore.ts";
+import { useStatusTransitionAnnouncer } from "../lib/guard/statusTransitions.ts";
 
 /**
  * The proactive dead-man-switch deadline banner, shown above the on-chain
@@ -103,22 +103,7 @@ export function StatusPanel() {
   const { snapshot, snapshotError, refreshing, refresh, guard, wallet, retryRead, retryingField } =
     useGuard();
 
-  // The shared density preference, so the stat grids here follow the same
-  // comfortable/compact switch the telemetry feed exposes.
-  const [densityState, setDensityState] = useState<"comfortable" | "compact">("comfortable");
-
-  useEffect(() => {
-    const unsubscribe = initDensityStore();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDensityState(density.get());
-    const densityUnsubscribe = density.subscribe((value) => {
-      setDensityState(value);
-    });
-    return () => {
-      unsubscribe();
-      densityUnsubscribe();
-    };
-  }, []);
+  useStatusTransitionAnnouncer(snapshot);
 
   const printReport = snapshot
     ? compilePrintReport(snapshot, NETWORK.name, wallet?.address || "Disconnected")
