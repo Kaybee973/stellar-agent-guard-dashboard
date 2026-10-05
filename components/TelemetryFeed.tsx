@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { describeGuardEvent, explainReason, GUARD_EVENT_TOPICS } from "stellar-agent-guard-sdk";
 import type { GuardEvent } from "stellar-agent-guard-sdk";
 import { STREAM_BUFFER_LIMIT, type TelemetryEvent } from "../lib/guard/telemetry.ts";
@@ -127,6 +127,22 @@ export function TelemetryFeed() {
       tab: next.verdict === "all" ? "console" : "telemetry",
     });
   }
+
+  const [densityState, setDensityState] = useState<"comfortable" | "compact">("comfortable");
+
+  useEffect(() => {
+    const unsubscribe = initDensityStore();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDensityState(density.get());
+    const densityUnsubscribe = density.subscribe((value) => {
+      setDensityState(value);
+    });
+    return () => {
+      unsubscribe();
+      densityUnsubscribe();
+    };
+  }, []);
+
   const announce = useAnnounce();
   const demo = useDemoMode();
 
@@ -407,7 +423,7 @@ export function TelemetryFeed() {
              shape the events will land in — not as an empty-looking message
              and not as zeros. */
           <div className="scrolly" aria-busy="true">
-            <table className="events">
+            <table className={`events ${densityState === "compact" ? "compact" : ""}`}>
               {feedHead}
               <tbody aria-hidden="true">
                 {[0, 1, 2].map((row) => (
@@ -446,7 +462,7 @@ export function TelemetryFeed() {
         </p>
       ) : (
         <div className="scrolly">
-          <table className="events">
+          <table className={`events ${densityState === "compact" ? "compact" : ""}`}>
             {feedHead}
             <tbody>
               {rows.map((event) => (
