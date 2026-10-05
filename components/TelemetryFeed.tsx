@@ -215,9 +215,12 @@ export function TelemetryFeed() {
             Clear buffer
           </button>
           {/* Density toggle */}
-          <button className="secondary" onClick={() => {
-            density.set(densityState === "comfortable" ? "compact" : "comfortable");
-          }}>
+          <button
+            className="secondary"
+            onClick={() => {
+              density.set(densityState === "comfortable" ? "compact" : "comfortable");
+            }}
+          >
             {densityState === "comfortable" ? "Compact" : "Comfortable"}
           </button>
         </div>

@@ -25,14 +25,14 @@ describe("PanicPanel", () => {
       },
       clear: () => {
         store = {};
-      }
+      },
     };
   })();
 
   before(async () => {
     dom = installDom();
     // Mock localStorage
-    Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
+    Object.defineProperty(window, "localStorage", { value: localStorageMock, writable: true });
     const reactDeps = await loadReact();
     React = reactDeps.react;
     createRoot = reactDeps.createRoot;
@@ -115,8 +115,8 @@ describe("PanicPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(PanicPanel)
-        )
+          React.createElement(PanicPanel),
+        ),
       );
     });
 
@@ -144,19 +144,21 @@ describe("PanicPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(PanicPanel)
-        )
+          React.createElement(PanicPanel),
+        ),
       );
     });
 
     // Click the freeze button to trigger confirmation
-    const freezeButton = document.querySelector('button:has-text("Freeze this account")') as HTMLButtonElement | null;
+    const freezeButton = document.querySelector(
+      'button:has-text("Freeze this account")',
+    ) as HTMLButtonElement | null;
     assert.ok(freezeButton, "Freeze button should exist");
     freezeButton?.click();
 
     // Wait for state update
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 50));
+      return new Promise((resolve) => setTimeout(resolve, 50));
     });
 
     // Check that confirmation dialog is shown
@@ -193,15 +195,21 @@ describe("PanicPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(PanicPanel)
-        )
+          React.createElement(PanicPanel),
+        ),
       );
     });
 
     // Check that freeze button is disabled
-    const freezeButton = document.querySelector('button:has-text("Freeze this account")') as HTMLButtonElement | null;
+    const freezeButton = document.querySelector(
+      'button:has-text("Freeze this account")',
+    ) as HTMLButtonElement | null;
     assert.ok(freezeButton, "Freeze button should exist");
-    assert.strictEqual(freezeButton?.disabled, true, "Freeze button should be disabled when already frozen");
+    assert.strictEqual(
+      freezeButton?.disabled,
+      true,
+      "Freeze button should be disabled when already frozen",
+    );
   });
 
   test("disables unfreeze button when not frozen", async () => {
@@ -230,15 +238,21 @@ describe("PanicPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(PanicPanel)
-        )
+          React.createElement(PanicPanel),
+        ),
       );
     });
 
     // Check that unfreeze button is disabled
-    const unfreezeButton = document.querySelector('button:has-text("Unfreeze")') as HTMLButtonElement | null;
+    const unfreezeButton = document.querySelector(
+      'button:has-text("Unfreeze")',
+    ) as HTMLButtonElement | null;
     assert.ok(unfreezeButton, "Unfreeze button should exist");
-    assert.strictEqual(unfreezeButton?.disabled, true, "Unfreeze button should be disabled when not frozen");
+    assert.strictEqual(
+      unfreezeButton?.disabled,
+      true,
+      "Unfreeze button should be disabled when not frozen",
+    );
   });
 
   test("shows connected wallet requirement", async () => {
@@ -255,8 +269,8 @@ describe("PanicPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(PanicPanel)
-        )
+          React.createElement(PanicPanel),
+        ),
       );
     });
 
@@ -279,23 +293,27 @@ describe("PanicPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(PanicPanel)
-        )
+          React.createElement(PanicPanel),
+        ),
       );
     });
 
     // Trigger freeze confirmation and then check for export option
-    const freezeButton = document.querySelector('button:has-text("Freeze this account")') as HTMLButtonElement | null;
+    const freezeButton = document.querySelector(
+      'button:has-text("Freeze this account")',
+    ) as HTMLButtonElement | null;
     assert.ok(freezeButton, "Freeze button should exist");
     freezeButton?.click();
 
     // Wait for state update
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 50));
+      return new Promise((resolve) => setTimeout(resolve, 50));
     });
 
     // Check export button exists in confirmation dialog
-    const exportButton = document.querySelector('button:has-text("Export XDR")') as HTMLButtonElement | null;
+    const exportButton = document.querySelector(
+      'button:has-text("Export XDR")',
+    ) as HTMLButtonElement | null;
     assert.ok(exportButton, "Export XDR button should exist in confirmation dialog");
   });
 });

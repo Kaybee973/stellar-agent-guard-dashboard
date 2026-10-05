@@ -24,14 +24,14 @@ describe("DeployPanel", () => {
       },
       clear: () => {
         store = {};
-      }
+      },
     };
   })();
 
   before(async () => {
     dom = installDom();
     // Mock localStorage
-    Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
+    Object.defineProperty(window, "localStorage", { value: localStorageMock, writable: true });
     const reactDeps = await loadReact();
     React = reactDeps.react;
     createRoot = reactDeps.createRoot;
@@ -116,14 +116,16 @@ describe("DeployPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(DeployPanel)
-        )
+          React.createElement(DeployPanel),
+        ),
       );
     });
 
     // Check that it renders correctly
     assert.dom(document.body).containsText("Deploy a guard");
-    assert.dom(document.body).containsText("Connect the admin wallet to compute the contract address.");
+    assert
+      .dom(document.body)
+      .containsText("Connect the admin wallet to compute the contract address.");
     assert.dom(document.body).containsText("Working out the deploy plan...");
   });
 
@@ -141,13 +143,15 @@ describe("DeployPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(DeployPanel)
-        )
+          React.createElement(DeployPanel),
+        ),
       );
     });
 
     // Check wallet connection message
-    assert.dom(document.body).containsText("Connect the admin wallet to compute the contract address.");
+    assert
+      .dom(document.body)
+      .containsText("Connect the admin wallet to compute the contract address.");
   });
 
   test("shows artifact checking state", async () => {
@@ -167,8 +171,8 @@ describe("DeployPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(DeployPanel)
-        )
+          React.createElement(DeployPanel),
+        ),
       );
     });
 
@@ -195,8 +199,8 @@ describe("DeployPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(DeployPanel)
-        )
+          React.createElement(DeployPanel),
+        ),
       );
     });
 
@@ -206,7 +210,9 @@ describe("DeployPanel", () => {
     assert.dom(document.body).containsText("Deploy guard");
 
     // Check deploy button exists
-    const deployButton = document.querySelector('button:has-text("Deploy guard")') as HTMLButtonElement | null;
+    const deployButton = document.querySelector(
+      'button:has-text("Deploy guard")',
+    ) as HTMLButtonElement | null;
     assert.ok(deployButton, "Deploy button should exist");
     // Note: We can't easily test the disabled state without mocking the artifact check
     // but we can verify the button exists
@@ -229,8 +235,8 @@ describe("DeployPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(DeployPanel)
-        )
+          React.createElement(DeployPanel),
+        ),
       );
     });
 

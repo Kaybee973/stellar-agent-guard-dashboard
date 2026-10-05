@@ -128,7 +128,9 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
               </div>
               <div className="row">
                 <span className="pill">Soroban testnet</span>
-                <a href="https://github.com/aigbagbobila/stellar-agent-guard-contracts">contracts</a>
+                <a href="https://github.com/aigbagbobila/stellar-agent-guard-contracts">
+                  contracts
+                </a>
                 <a href="https://github.com/aigbagbobila/stellar-agent-guard-sdk">sdk</a>
               </div>
             </header>
@@ -157,7 +159,10 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
 
             {/* Sidebar content */}
             <nav className="sidebar-content" aria-label="Main navigation">
-              <div className="row" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
+              <div
+                className="row"
+                style={{ justifyContent: "space-between", marginBottom: "16px" }}
+              >
                 <Tabs />
                 <ThemeToggle />
               </div>
@@ -169,7 +174,10 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           <main className={`main-content ${sidebarCollapsed ? "expanded" : ""}`}>
             {/* Desktop-only header (if not mobile) */}
             {!isMobile && (
-              <div className="row" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
+              <div
+                className="row"
+                style={{ justifyContent: "space-between", marginBottom: "16px" }}
+              >
                 <div className="spacer"></div> {/* Empty space to maintain height alignment */}
                 <div className="spacer"></div>
               </div>
@@ -178,42 +186,45 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           </main>
         </div>
 
-      {/* Mobile drawer backdrop */}
-      {drawerOpen && (
-        <div
-          className="mobile-backdrop"
-          onClick={() => setDrawerOpen(false)}
-          role="presentation"
-        />
-      )}
+        {/* Mobile drawer backdrop */}
+        {drawerOpen && (
+          <div
+            className="mobile-backdrop"
+            onClick={() => setDrawerOpen(false)}
+            role="presentation"
+          />
+        )}
 
-      {/* Mobile drawer */}
-      {drawerOpen && (
-        <div
-          className="mobile-drawer"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="mobile-drawer-title"
-        >
-          <div className="mobile-drawer-header">
-            <h2 id="mobile-drawer-title">Navigation</h2>
-            <button
-              className="secondary"
-              onClick={() => setDrawerOpen(false)}
-              aria-label="Close navigation menu"
-            >
-              ×
-            </button>
-          </div>
-          <nav className="mobile-drawer-content" aria-label="Mobile navigation">
-            <div className="row" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
-              <Tabs />
-              <ThemeToggle />
+        {/* Mobile drawer */}
+        {drawerOpen && (
+          <div
+            className="mobile-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-drawer-title"
+          >
+            <div className="mobile-drawer-header">
+              <h2 id="mobile-drawer-title">Navigation</h2>
+              <button
+                className="secondary"
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Close navigation menu"
+              >
+                ×
+              </button>
             </div>
-            {children}
-          </nav>
-        </div>
-      )}
+            <nav className="mobile-drawer-content" aria-label="Mobile navigation">
+              <div
+                className="row"
+                style={{ justifyContent: "space-between", marginBottom: "16px" }}
+              >
+                <Tabs />
+                <ThemeToggle />
+              </div>
+              {children}
+            </nav>
+          </div>
+        )}
       </ThemeProvider>
     </>
   );

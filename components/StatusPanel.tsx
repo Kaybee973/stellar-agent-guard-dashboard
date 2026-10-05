@@ -31,6 +31,23 @@ export function StatusPanel() {
   const { snapshot, snapshotError, refreshing, refresh, guard, wallet, retryRead, retryingField } =
     useGuard();
 
+  // The shared density preference, so the stat grids here follow the same
+  // comfortable/compact switch the telemetry feed exposes.
+  const [densityState, setDensityState] = useState<"comfortable" | "compact">("comfortable");
+
+  useEffect(() => {
+    const unsubscribe = initDensityStore();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDensityState(density.get());
+    const densityUnsubscribe = density.subscribe((value) => {
+      setDensityState(value);
+    });
+    return () => {
+      unsubscribe();
+      densityUnsubscribe();
+    };
+  }, []);
+
   const printReport = snapshot
     ? compilePrintReport(snapshot, NETWORK.name, wallet?.address || "Disconnected")
     : null;
@@ -70,7 +87,10 @@ export function StatusPanel() {
 
       {snapshot && (
         <>
-          <div className={`grid ${densityState === "compact" ? "compact" : ""}`} style={{ marginTop: 12 }}>
+          <div
+            className={`grid ${densityState === "compact" ? "compact" : ""}`}
+            style={{ marginTop: 12 }}
+          >
             <Stat
               label="Admin freeze"
               tone={

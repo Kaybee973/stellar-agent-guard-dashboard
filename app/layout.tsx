@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { LayoutShell } from "../components/LayoutShell.tsx";
+import { DemoBadge } from "../components/DemoBadge.tsx";
+import { Tabs } from "../components/bits.tsx";
+import { AriaAnnouncer } from "../components/AriaAnnouncer.tsx";
 import { PwaRegistrar } from "../components/PwaRegistrar.tsx";
+import { ThemeProvider } from "../components/ThemeProvider.tsx";
+import { ThemeToggle } from "../components/ThemeToggle.tsx";
 import { PWA_MANIFEST_PATH, PWA_THEME_COLOR } from "../lib/guard/pwa.ts";
 import "./globals.css";
 

@@ -42,7 +42,13 @@ describe("LayoutShell", () => {
     root = createRoot(div);
 
     await act(() => {
-      root!.render(React.createElement(LayoutShell, null, React.createElement("div", { "data-testid": "content" }, "test content")));
+      root!.render(
+        React.createElement(
+          LayoutShell,
+          null,
+          React.createElement("div", { "data-testid": "content" }, "test content"),
+        ),
+      );
     });
 
     // Check that desktop elements are present
@@ -75,7 +81,13 @@ describe("LayoutShell", () => {
     root = createRoot(div);
 
     await act(() => {
-      root!.render(React.createElement(LayoutShell, null, React.createElement("div", { "data-testid": "content" }, "test content")));
+      root!.render(
+        React.createElement(
+          LayoutShell,
+          null,
+          React.createElement("div", { "data-testid": "content" }, "test content"),
+        ),
+      );
     });
 
     // Check that mobile elements are present
@@ -108,7 +120,13 @@ describe("LayoutShell", () => {
     root = createRoot(div);
 
     await act(() => {
-      root!.render(React.createElement(LayoutShell, null, React.createElement("div", { "data-testid": "content" }, "test content")));
+      root!.render(
+        React.createElement(
+          LayoutShell,
+          null,
+          React.createElement("div", { "data-testid": "content" }, "test content"),
+        ),
+      );
     });
 
     // Initially sidebar should be expanded (collapsed = false)
@@ -123,7 +141,7 @@ describe("LayoutShell", () => {
 
     // Wait for state update
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Sidebar should now be collapsed
@@ -144,7 +162,13 @@ describe("LayoutShell", () => {
     root = createRoot(div);
 
     await act(() => {
-      root!.render(React.createElement(LayoutShell, null, React.createElement("div", { "data-testid": "content" }, "test content")));
+      root!.render(
+        React.createElement(
+          LayoutShell,
+          null,
+          React.createElement("div", { "data-testid": "content" }, "test content"),
+        ),
+      );
     });
 
     // Sidebar should still be collapsed from localStorage
@@ -166,7 +190,13 @@ describe("LayoutShell", () => {
     root = createRoot(div);
 
     await act(() => {
-      root!.render(React.createElement(LayoutShell, null, React.createElement("div", { "data-testid": "content" }, "test content")));
+      root!.render(
+        React.createElement(
+          LayoutShell,
+          null,
+          React.createElement("div", { "data-testid": "content" }, "test content"),
+        ),
+      );
     });
 
     // Initially drawer should be closed
@@ -174,13 +204,15 @@ describe("LayoutShell", () => {
     assert.notOk(document.querySelector(".mobile-backdrop"));
 
     // Click the hamburger button to open drawer
-    const hamburgerButton = document.querySelector('.mobile-header button[aria-label="Open navigation menu"]') as HTMLButtonElement | null;
+    const hamburgerButton = document.querySelector(
+      '.mobile-header button[aria-label="Open navigation menu"]',
+    ) as HTMLButtonElement | null;
     assert.ok(hamburgerButton, "Hamburger button should exist");
     hamburgerButton?.click();
 
     // Wait for state update
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Drawer should now be open
@@ -189,13 +221,15 @@ describe("LayoutShell", () => {
     assert.ok(document.querySelector('[aria-modal="true"]'));
 
     // Click the close button in drawer
-    const closeButton = document.querySelector('.mobile-drawer-header button[aria-label="Close navigation menu"]') as HTMLButtonElement | null;
+    const closeButton = document.querySelector(
+      '.mobile-drawer-header button[aria-label="Close navigation menu"]',
+    ) as HTMLButtonElement | null;
     assert.ok(closeButton, "Close button should exist");
     closeButton?.click();
 
     // Wait for state update
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Drawer should now be closed
@@ -205,7 +239,7 @@ describe("LayoutShell", () => {
     // Click on backdrop to close drawer (alternative method)
     hamburgerButton?.click();
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     const backdrop = document.querySelector<HTMLElement>(".mobile-backdrop");
@@ -213,7 +247,7 @@ describe("LayoutShell", () => {
     backdrop?.click();
 
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     assert.notOk(document.querySelector(".mobile-drawer"));
@@ -233,15 +267,23 @@ describe("LayoutShell", () => {
     root = createRoot(div);
 
     await act(() => {
-      root!.render(React.createElement(LayoutShell, null, React.createElement("div", { "data-testid": "content" }, "test content")));
+      root!.render(
+        React.createElement(
+          LayoutShell,
+          null,
+          React.createElement("div", { "data-testid": "content" }, "test content"),
+        ),
+      );
     });
 
     // Open the drawer
-    const hamburgerButton = document.querySelector('.mobile-header button[aria-label="Open navigation menu"]') as HTMLButtonElement | null;
+    const hamburgerButton = document.querySelector(
+      '.mobile-header button[aria-label="Open navigation menu"]',
+    ) as HTMLButtonElement | null;
     hamburgerButton?.click();
 
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Drawer should be open
@@ -253,7 +295,7 @@ describe("LayoutShell", () => {
 
     // Wait for state update
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Drawer should be closed
@@ -274,15 +316,23 @@ describe("LayoutShell", () => {
     root = createRoot(div);
 
     await act(() => {
-      root!.render(React.createElement(LayoutShell, null, React.createElement("div", { "data-testid": "content" }, "test content")));
+      root!.render(
+        React.createElement(
+          LayoutShell,
+          null,
+          React.createElement("div", { "data-testid": "content" }, "test content"),
+        ),
+      );
     });
 
     // Open the drawer
-    const hamburgerButton = document.querySelector('.mobile-header button[aria-label="Open navigation menu"]') as HTMLButtonElement | null;
+    const hamburgerButton = document.querySelector(
+      '.mobile-header button[aria-label="Open navigation menu"]',
+    ) as HTMLButtonElement | null;
     hamburgerButton?.click();
 
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Drawer should be open
@@ -298,7 +348,7 @@ describe("LayoutShell", () => {
 
     // Wait for state update
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Drawer should be closed when resized to desktop

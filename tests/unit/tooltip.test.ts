@@ -37,13 +37,7 @@ describe("Tooltip", () => {
     const triggerElement = React.createElement("button", { "data-testid": "trigger" }, "Hover me");
 
     await act(() => {
-      root!.render(
-        React.createElement(
-          Tooltip,
-          { content: "Tooltip content" },
-          triggerElement
-        )
-      );
+      root!.render(React.createElement(Tooltip, { content: "Tooltip content" }, triggerElement));
     });
 
     // Check that the trigger element is rendered
@@ -53,7 +47,11 @@ describe("Tooltip", () => {
 
     // Initially tooltip should not be visible
     assert.notOk(document.querySelector(".tooltip"), "Tooltip should not be visible initially");
-    assert.strictEqual(trigger?.getAttribute("aria-describedby"), null, "aria-describedby should be null when tooltip is not showing");
+    assert.strictEqual(
+      trigger?.getAttribute("aria-describedby"),
+      null,
+      "aria-describedby should be null when tooltip is not showing",
+    );
   });
 
   test("shows tooltip on mouse enter after delay", async () => {
@@ -71,8 +69,8 @@ describe("Tooltip", () => {
             content: "Tooltip content",
             delay: 10, // Short delay for testing
           },
-          triggerElement
-        )
+          triggerElement,
+        ),
       );
     });
 
@@ -84,27 +82,38 @@ describe("Tooltip", () => {
 
     // Wait for delay period
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 20));
+      return new Promise((resolve) => setTimeout(resolve, 20));
     });
 
     // Tooltip should now be visible
-    assert.ok(document.querySelector(".tooltip"), "Tooltip should be visible after mouse enter delay");
+    assert.ok(
+      document.querySelector(".tooltip"),
+      "Tooltip should be visible after mouse enter delay",
+    );
     const contentEl = document.querySelector(".tooltip-content");
     assert.ok(contentEl, "Tooltip content element should exist");
     assert.strictEqual(contentEl?.textContent, "Tooltip content");
-    assert.strictEqual(trigger?.getAttribute("aria-describedby"), "tooltip-content", "aria-describedby should point to tooltip content");
+    assert.strictEqual(
+      trigger?.getAttribute("aria-describedby"),
+      "tooltip-content",
+      "aria-describedby should point to tooltip content",
+    );
 
     // Simulate mouse leave
     trigger?.dispatchEvent(new MouseEvent("mouseleave"));
 
     // Wait a bit for tooltip to hide
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Tooltip should now be hidden
     assert.notOk(document.querySelector(".tooltip"), "Tooltip should be hidden after mouse leave");
-    assert.strictEqual(trigger?.getAttribute("aria-describedby"), null, "aria-describedby should be null when tooltip is not showing");
+    assert.strictEqual(
+      trigger?.getAttribute("aria-describedby"),
+      null,
+      "aria-describedby should be null when tooltip is not showing",
+    );
   });
 
   test("shows tooltip on focus after delay", async () => {
@@ -112,7 +121,11 @@ describe("Tooltip", () => {
     document.body.appendChild(div);
     root = createRoot(div);
 
-    const triggerElement = React.createElement("button", { "data-testid": "trigger", tabIndex: 0 }, "Focus me");
+    const triggerElement = React.createElement(
+      "button",
+      { "data-testid": "trigger", tabIndex: 0 },
+      "Focus me",
+    );
 
     await act(() => {
       root!.render(
@@ -122,8 +135,8 @@ describe("Tooltip", () => {
             content: "Tooltip content",
             delay: 10, // Short delay for testing
           },
-          triggerElement
-        )
+          triggerElement,
+        ),
       );
     });
 
@@ -136,7 +149,7 @@ describe("Tooltip", () => {
 
     // Wait for delay period
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 20));
+      return new Promise((resolve) => setTimeout(resolve, 20));
     });
 
     // Tooltip should now be visible
@@ -144,19 +157,27 @@ describe("Tooltip", () => {
     const contentEl = document.querySelector(".tooltip-content");
     assert.ok(contentEl, "Tooltip content element should exist");
     assert.strictEqual(contentEl?.textContent, "Tooltip content");
-    assert.strictEqual(trigger?.getAttribute("aria-describedby"), "tooltip-content", "aria-describedby should point to tooltip content");
+    assert.strictEqual(
+      trigger?.getAttribute("aria-describedby"),
+      "tooltip-content",
+      "aria-describedby should point to tooltip content",
+    );
 
     // Simulate blur
     trigger?.dispatchEvent(new FocusEvent("blur"));
 
     // Wait a bit for tooltip to hide
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Tooltip should now be hidden
     assert.notOk(document.querySelector(".tooltip"), "Tooltip should be hidden after blur");
-    assert.strictEqual(trigger?.getAttribute("aria-describedby"), null, "aria-describedby should be null when tooltip is not showing");
+    assert.strictEqual(
+      trigger?.getAttribute("aria-describedby"),
+      null,
+      "aria-describedby should be null when tooltip is not showing",
+    );
   });
 
   test("hides tooltip when escape key is pressed", async () => {
@@ -174,8 +195,8 @@ describe("Tooltip", () => {
             content: "Tooltip content",
             delay: 10, // Short delay for testing
           },
-          triggerElement
-        )
+          triggerElement,
+        ),
       );
     });
 
@@ -185,7 +206,7 @@ describe("Tooltip", () => {
     // Show tooltip via mouse enter
     trigger?.dispatchEvent(new MouseEvent("mouseenter"));
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 20));
+      return new Promise((resolve) => setTimeout(resolve, 20));
     });
 
     // Verify tooltip is showing
@@ -197,12 +218,16 @@ describe("Tooltip", () => {
 
     // Wait a bit for tooltip to hide
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 10));
+      return new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Tooltip should now be hidden
     assert.notOk(document.querySelector(".tooltip"), "Tooltip should be hidden after escape key");
-    assert.strictEqual(trigger?.getAttribute("aria-describedby"), null, "aria-describedby should be null when tooltip is not showing");
+    assert.strictEqual(
+      trigger?.getAttribute("aria-describedby"),
+      null,
+      "aria-describedby should be null when tooltip is not showing",
+    );
   });
 
   test("positions tooltip correctly based on viewport boundaries", async () => {
@@ -222,7 +247,11 @@ describe("Tooltip", () => {
       value: 200,
     });
 
-    const triggerElement = React.createElement("button", { "data-testid": "trigger", style: { position: "fixed", top: "10px", left: "10px" } }, "Hover me");
+    const triggerElement = React.createElement(
+      "button",
+      { "data-testid": "trigger", style: { position: "fixed", top: "10px", left: "10px" } },
+      "Hover me",
+    );
 
     await act(() => {
       root!.render(
@@ -233,8 +262,8 @@ describe("Tooltip", () => {
             delay: 10,
             distance: 5,
           },
-          triggerElement
-        )
+          triggerElement,
+        ),
       );
     });
 
@@ -244,7 +273,7 @@ describe("Tooltip", () => {
     // Show tooltip
     trigger?.dispatchEvent(new MouseEvent("mouseenter"));
     await act(() => {
-      return new Promise(resolve => setTimeout(resolve, 20));
+      return new Promise((resolve) => setTimeout(resolve, 20));
     });
 
     // Tooltip should be visible
@@ -258,7 +287,7 @@ describe("Tooltip", () => {
         tooltipStyle.bottom !== "auto" ||
         tooltipStyle.left !== "auto" ||
         tooltipStyle.right !== "auto",
-      "Tooltip should have positioning applied"
+      "Tooltip should have positioning applied",
     );
   });
 
@@ -277,19 +306,25 @@ describe("Tooltip", () => {
     const triggerElement = React.createElement("button", triggerProps, "Trigger");
 
     await act(() => {
-      root!.render(
-        React.createElement(
-          Tooltip,
-          { content: "Tooltip content" },
-          triggerElement
-        )
-      );
+      root!.render(React.createElement(Tooltip, { content: "Tooltip content" }, triggerElement));
     });
 
     const trigger = document.querySelector("#custom-id") as HTMLElement | null;
     assert.ok(trigger, "Trigger element should have the correct id");
-    assert.strictEqual(trigger?.getAttribute("class"), "custom-class", "Trigger element should have the correct class");
-    assert.strictEqual(trigger?.getAttribute("data-custom"), "value", "Trigger element should have the correct data attribute");
-    assert.strictEqual(trigger?.getAttribute("title"), "Original title", "Trigger element should preserve original title");
+    assert.strictEqual(
+      trigger?.getAttribute("class"),
+      "custom-class",
+      "Trigger element should have the correct class",
+    );
+    assert.strictEqual(
+      trigger?.getAttribute("data-custom"),
+      "value",
+      "Trigger element should have the correct data attribute",
+    );
+    assert.strictEqual(
+      trigger?.getAttribute("title"),
+      "Original title",
+      "Trigger element should preserve original title",
+    );
   });
 });

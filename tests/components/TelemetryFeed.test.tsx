@@ -3,7 +3,11 @@ import { test, before, afterEach, describe } from "node:test";
 import { installDom, loadReact } from "../unit/domHarness.ts";
 import { TelemetryFeed } from "../../components/TelemetryFeed.tsx";
 import type { GuardEvent } from "stellar-agent-guard-sdk";
-import { GuardContext, GuardEventsContext, type GuardContextValue } from "../../components/GuardProvider.tsx";
+import {
+  GuardContext,
+  GuardEventsContext,
+  type GuardContextValue,
+} from "../../components/GuardProvider.tsx";
 
 describe("TelemetryFeed", () => {
   let dom: ReturnType<typeof installDom>;
@@ -25,14 +29,14 @@ describe("TelemetryFeed", () => {
       },
       clear: () => {
         store = {};
-      }
+      },
     };
   })();
 
   before(async () => {
     dom = installDom();
     // Mock localStorage
-    Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
+    Object.defineProperty(window, "localStorage", { value: localStorageMock, writable: true });
     const reactDeps = await loadReact();
     React = reactDeps.react;
     createRoot = reactDeps.createRoot;
@@ -72,8 +76,8 @@ describe("TelemetryFeed", () => {
       React.createElement(
         GuardEventsContext.Provider,
         { value: mockValue.events || [] },
-        React.createElement(TelemetryFeed)
-      )
+        React.createElement(TelemetryFeed),
+      ),
     );
   }
 
@@ -139,9 +143,12 @@ describe("TelemetryFeed", () => {
     // Mock guard events
     const mockEvents: GuardEvent[] = [
       {
+        id: "ledger:abc123:event_heartbeat",
         kind: "heartbeat",
         topic: "heartbeat",
         source: "ledger",
+        stream: "committed",
+        observedAt: null,
         transactionHash: "abc123",
         ledger: 100000,
         contractId: "C123",
@@ -154,16 +161,19 @@ describe("TelemetryFeed", () => {
         data: {},
       },
       {
+        id: "ledger:def456:event_frozen",
         kind: "frozen",
         topic: "frozen",
         source: "ledger",
+        stream: "committed",
+        observedAt: null,
         contractId: "C123",
         ledgerClosedAt: "2026-01-01T00:00:00Z",
         transactionHash: "def456",
         ledger: 100001,
         decision: {
           result: "blocked",
-          reason: "not_authorized",
+          reason: "unauthorized",
           source: "diagnostic",
         },
         data: {},
@@ -207,9 +217,12 @@ describe("TelemetryFeed", () => {
     // Mock guard events
     const mockEvents: GuardEvent[] = [
       {
+        id: "ledger:abc123:event_heartbeat",
         kind: "heartbeat",
         topic: "heartbeat",
         source: "ledger",
+        stream: "committed",
+        observedAt: null,
         transactionHash: "abc123",
         ledger: 100000,
         contractId: "C123",
@@ -238,11 +251,15 @@ describe("TelemetryFeed", () => {
     });
 
     // Check that clear button exists and is enabled
-    const clearButton = Array.from(document.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Clear")
+    const clearButton = Array.from(document.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Clear"),
     ) as HTMLButtonElement | undefined;
     assert.ok(clearButton, "Clear button should exist");
-    assert.strictEqual(clearButton?.disabled, false, "Clear button should be enabled when events exist");
+    assert.strictEqual(
+      clearButton?.disabled,
+      false,
+      "Clear button should be enabled when events exist",
+    );
   });
 
   test("hides clear button when no events", async () => {
@@ -265,11 +282,15 @@ describe("TelemetryFeed", () => {
     });
 
     // Check that clear button exists but is disabled
-    const clearButton = Array.from(document.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Clear")
+    const clearButton = Array.from(document.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Clear"),
     ) as HTMLButtonElement | undefined;
     assert.ok(clearButton, "Clear button should exist");
-    assert.strictEqual(clearButton?.disabled, true, "Clear button should be disabled when no events exist");
+    assert.strictEqual(
+      clearButton?.disabled,
+      true,
+      "Clear button should be disabled when no events exist",
+    );
   });
 
   test("shows error state", async () => {

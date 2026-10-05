@@ -25,14 +25,14 @@ describe("StatusPanel", () => {
       },
       clear: () => {
         store = {};
-      }
+      },
     };
   })();
 
   before(async () => {
     dom = installDom();
     // Mock localStorage
-    Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
+    Object.defineProperty(window, "localStorage", { value: localStorageMock, writable: true });
     const reactDeps = await loadReact();
     React = reactDeps.react;
     createRoot = reactDeps.createRoot;
@@ -282,8 +282,8 @@ describe("StatusPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(StatusPanel)
-        )
+          React.createElement(StatusPanel),
+        ),
       );
     });
 
@@ -311,8 +311,8 @@ describe("StatusPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(StatusPanel)
-        )
+          React.createElement(StatusPanel),
+        ),
       );
     });
 
@@ -335,8 +335,8 @@ describe("StatusPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(StatusPanel)
-        )
+          React.createElement(StatusPanel),
+        ),
       );
     });
 
@@ -359,8 +359,8 @@ describe("StatusPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(StatusPanel)
-        )
+          React.createElement(StatusPanel),
+        ),
       );
     });
 
@@ -385,8 +385,8 @@ describe("StatusPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(StatusPanel)
-        )
+          React.createElement(StatusPanel),
+        ),
       );
     });
 
@@ -410,8 +410,8 @@ describe("StatusPanel", () => {
         React.createElement(
           GuardContext.Provider,
           { value: mockValue },
-          React.createElement(StatusPanel)
-        )
+          React.createElement(StatusPanel),
+        ),
       );
     });
 
