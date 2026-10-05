@@ -16,8 +16,9 @@ import type { ArtifactCheck, DeployOutcome, DeployPlan } from "../lib/guard/guar
 import type { InvokeResult } from "../lib/guard/submit.ts";
 import { NETWORK, PHASE1_ARTIFACT } from "../lib/guard/network.ts";
 import { fetchContractWasm, verifyWasmIdentity } from "../lib/guard/chain.ts";
-import { toHex } from "stellar-agent-guard-sdk";
+import { toHex } from "../lib/guard/scval.ts";
 import { validateInitParameters, type InitValidation } from "../lib/guard/initValidator.ts";
+import { sanitizeAddressInput } from "../lib/guard/inputSanitizer.ts";
 import {
   contractAlreadyDeployed,
   createSaltAddressPredictor,
@@ -55,6 +56,10 @@ import { ErrorBlock, OutcomeList, starLink } from "./bits.tsx";
 /** Either the chain's answer about the artifact, or why there is not one. */
 type ArtifactFetch = { artifact: ArtifactCheck } | { error: string };
 
+// parked-until-upstream: #13
+// The multi-artifact version picker is blocked until the upstream stellar-agent-guard-contracts
+// repository lands its release-workflow and publishes its first versioned artifact, and the SDK
+// exports GUARD_WASM_HASH for the recommended build.
 export function DeployPanel() {
   const { server, signer, wallet, refresh, addInstance, guard } = useGuard();
   const [artifact, setArtifact] = useState<ArtifactCheck | null>(null);
@@ -755,7 +760,7 @@ export function DeployPanel() {
         <span className="lbl">Agent public key (32 raw Ed25519 bytes, hex)</span>
         <input
           value={agentPubkey}
-          onChange={(event) => setAgentPubkey(event.target.value)}
+          onChange={(event) => setAgentPubkey(sanitizeAddressInput(event.target.value))}
           placeholder="53b093e0281a2d8f4276b77fd21e3380b3329f09097ace3d9e60cf0f2f9039e2"
         />
         <span className="hint">
@@ -774,7 +779,7 @@ export function DeployPanel() {
         <span className="lbl">Agent account address (G…)</span>
         <input
           value={agentAddress}
-          onChange={(event) => setAgentAddress(event.target.value)}
+          onChange={(event) => setAgentAddress(sanitizeAddressInput(event.target.value))}
           placeholder="GBUQ… (must differ from the connected admin)"
           aria-label="Agent account address"
         />
@@ -782,7 +787,12 @@ export function DeployPanel() {
 
       <div className="grid">
         <label className="field">
-          <span className="lbl">Dead-man grace (seconds)</span>
+          <span
+            className="lbl"
+            title="Seconds the agent may miss its heartbeat before the dead-man's switch freezes the account (docs/glossary.md — Dead-Man's Switch)"
+          >
+            Dead-man grace (seconds)
+          </span>
           <input
             value={dmsDurationSecs}
             onChange={(event) => setDmsDurationSecs(event.target.value)}
